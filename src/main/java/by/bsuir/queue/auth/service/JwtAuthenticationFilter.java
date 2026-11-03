@@ -18,6 +18,7 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
@@ -30,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
+        log.debug("JWT Filter: URI={}, authHeader={}", request.getRequestURI(), request.getHeader("Authorization"));
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String studentId;

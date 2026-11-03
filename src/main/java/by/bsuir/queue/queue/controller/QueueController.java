@@ -1,5 +1,7 @@
 package by.bsuir.queue.queue.controller;
 
+import by.bsuir.queue.queue.dto.QueueItemDto;
+import java.util.ArrayList;
 import by.bsuir.queue.booking.dto.BookRequest;
 import by.bsuir.queue.booking.model.Booking;
 import by.bsuir.queue.booking.repository.BookingRepository;
@@ -63,9 +65,33 @@ public class QueueController {
 
     // 2. Посмотреть текущую очередь
     @GetMapping("/queue")
-    public List<Booking> getQueue(@PathVariable Long sessionId) {
+    @Transactional(readOnly = true) // Важно, чтобы Hibernate не ругался на Lazy-связи
+    public List<QueueItemDto> getQueue(@PathVariable Long sessionId) {
         Session session = sessionRepository.findById(sessionId).orElseThrow();
-        return queueService.buildQueue(session);
+        List<Booking> queue = queueService.buildQueue(session);
+
+        List<QueueItemDto> result = new ArrayList<>();
+        for (int i = 0; i < queue.size(); i++) {
+            Booking b = queue.get(i);
+
+            // Считаем категорию для отображения
+            int p = labPassRepository.countByUserIdAndSubjectId(b.getUser().getId(), session.getSubject().getId());
+            int k = session.getLabNumber();
+            String category = (p == k - 1) ? "DEADLINER" : (p < k - 1 ? "DEBTOR" : "FAST");
+
+            // Проверяем, чей сейчас ход
+            boolean isCurrent = session.getCurrentBooking() != null && session.getCurrentBooking().getId().equals(b.getId());
+
+            result.add(new QueueItemDto(
+                    i + 1, // Позиция в очереди (с 1, а не с 0)
+                    b.getUser().getFullName(),
+                    category,
+                    b.getWantedCount(),
+                    b.getPassesDone(),
+                    isCurrent
+            ));
+        }
+        return result;
     }
 
     // 3. Нажать "Сдал"

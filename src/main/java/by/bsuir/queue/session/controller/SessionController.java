@@ -1,6 +1,7 @@
 package by.bsuir.queue.session.controller;
 
 import by.bsuir.queue.session.dto.CreateSessionRequest;
+import by.bsuir.queue.session.dto.SessionDto;
 import by.bsuir.queue.session.model.Session;
 import by.bsuir.queue.session.repository.SessionRepository;
 import by.bsuir.queue.subject.model.Subject;
@@ -46,7 +47,17 @@ public class SessionController {
     }
 
     @GetMapping
-    public java.util.List<Session> getAllSessions() {
-        return sessionRepository.findAll();
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public java.util.List<SessionDto> getAllSessions() {
+        return sessionRepository.findAll().stream().map(s -> {
+            SessionDto dto = new SessionDto();
+            dto.setId(s.getId());
+            dto.setSubjectName(s.getSubject().getName());
+            dto.setLabNumber(s.getLabNumber());
+            dto.setDeadlineDate(s.getDeadlineDate());
+            dto.setUnlockAt(s.getUnlockAt());
+            dto.setStatus(s.getStatus());
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
     }
 }
