@@ -1,14 +1,17 @@
 package by.bsuir.queue.session.model;
 
+import by.bsuir.queue.booking.model.Booking;
 import by.bsuir.queue.subject.model.Subject;
 import by.bsuir.queue.user.model.User;
-import by.bsuir.queue.booking.model.Booking;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "sessions")
 public class Session {
@@ -32,8 +35,9 @@ public class Session {
     @Column(name = "window_minutes", nullable = false)
     private Integer windowMinutes = 10;
 
+    /** SCHEDULED → OPEN (идёт запись) → CLOSED (идёт сдача) → FINISHED */
     @Column(nullable = false, length = 20)
-    private String status; // SCHEDULED, OPEN, CLOSED, FINISHED
+    private String status;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_booking_id")

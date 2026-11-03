@@ -1,10 +1,13 @@
 package by.bsuir.queue.user.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "users")
 public class User {
@@ -26,4 +29,10 @@ public class User {
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Override
+    public String toString() {
+        // без passwordHash — чтобы хэш не попал в логи
+        return "User{id=" + id + ", studentId=" + studentId + ", role=" + role + "}";
+    }
 }

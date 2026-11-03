@@ -4,10 +4,13 @@ import by.bsuir.queue.session.model.Session;
 import by.bsuir.queue.subject.model.Subject;
 import by.bsuir.queue.user.model.User;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "lab_passes")
 public class LabPass {
