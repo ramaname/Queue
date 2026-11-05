@@ -24,14 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Вся логика очереди. Любое изменение сессии идёт под блокировкой её строки в БД
- * (SELECT … FOR UPDATE), поэтому два одновременных «сдал», «сдал» и «пропустить»
- * или планировщик с пользователем не могут испортить очередь.
- *
- * Жизненный цикл: SCHEDULED → OPEN (идёт запись, очерёдности ещё нет) →
- * CLOSED (окно закрыто, очередь строится, студенты сдают по одному) → FINISHED.
- */
 @Service
 public class QueueService {
 
@@ -60,14 +52,8 @@ public class QueueService {
         this.turnTimeoutMinutes = turnTimeoutMinutes;
     }
 
-    /** Строка очереди: бронь + вычисленная категория. */
     public record QueueRow(Booking booking, Category category) { }
 
-    /* ====================================================================
-       Построение очереди
-       ==================================================================== */
-
-    /** Очередь сессии в порядке сдачи (только те, кто ещё не сдал всё, что хотел). */
     @Transactional(readOnly = true)
     public List<QueueRow> buildRows(Session session) {
         List<Booking> active = bookingRepository.findBySessionIdWithUser(session.getId()).stream()
@@ -189,7 +175,6 @@ public class QueueService {
         labPassRepository.save(labPass);
 
         current.setPassesDone(current.getPassesDone() + 1);
-        // сдал не всё, что хотел — едет в конец очереди, чтобы не занимать место подряд
         if (current.getPassesDone() < current.getWantedCount()) current.setRequeuedAt(LocalDateTime.now());
         bookingRepository.save(current);
 
@@ -206,10 +191,6 @@ public class QueueService {
         advanceTurn(sessionId);
         return "Вы пропущены.";
     }
-
-    /* ====================================================================
-       Действия администратора и планировщика
-       ==================================================================== */
 
     @Transactional
     public String adminSkip(Long sessionId) {
@@ -234,7 +215,6 @@ public class QueueService {
         sessionRepository.save(session);
     }
 
-    /** SCHEDULED → OPEN, когда пришло время открытия. */
     @Transactional
     public void openIfDue(Long sessionId) {
         Session s = lock(sessionId);
@@ -245,7 +225,6 @@ public class QueueService {
         }
     }
 
-    /** OPEN → CLOSED по истечении окна записи; сразу назначаем первого в очереди. */
     @Transactional
     public void closeWindowIfDue(Long sessionId) {
         Session s = lock(sessionId);
@@ -257,13 +236,12 @@ public class QueueService {
         }
     }
 
-    /** Автопропуск, если текущий не уложился в отведённое время. */
     @Transactional
     public void autoSkipIfExpired(Long sessionId) {
         Session s = lock(sessionId);
         if (!CLOSED.equals(s.getStatus())) return;
         Booking current = s.getCurrentBooking();
-        if (current == null) {            // страховка: идёт сдача, а текущего нет (например, после сбоя)
+        if (current == null) {
             advanceTurn(sessionId);
             return;
         }
@@ -274,10 +252,6 @@ public class QueueService {
             advanceTurn(sessionId);
         }
     }
-
-    /* ====================================================================
-       Чтение для фронтенда
-       ==================================================================== */
 
     @Transactional(readOnly = true)
     public List<QueueItemDto> getQueue(Long sessionId, String studentId) {
@@ -300,10 +274,6 @@ public class QueueService {
         }
         return result;
     }
-
-    /* ====================================================================
-       Вспомогательное
-       ==================================================================== */
 
     private Session lock(Long sessionId) {
         return sessionRepository.findByIdForUpdate(sessionId)

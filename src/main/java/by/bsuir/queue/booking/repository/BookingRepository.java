@@ -11,11 +11,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     boolean existsBySessionIdAndUserId(Long sessionId, Long userId);
 
-    /** Все брони сессии сразу с пользователями (без N+1). */
     @Query("select b from Booking b join fetch b.user where b.session.id = :sessionId")
     List<Booking> findBySessionIdWithUser(@Param("sessionId") Long sessionId);
 
-    /** Id сессий, в которые студент уже записан. */
     @Query("select b.session.id from Booking b where b.user.studentId = :studentId")
     List<Long> findSessionIdsByStudentId(@Param("studentId") String studentId);
 }

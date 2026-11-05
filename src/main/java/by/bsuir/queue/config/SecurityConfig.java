@@ -49,12 +49,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // статика фронтенда (src/main/resources/static) и страница ошибок
                         .requestMatchers("/", "/*.html", "/*.css", "/*.js", "/favicon.ico", "/error").permitAll()
-                        // профиль — только с токеном (правило раньше общего /api/auth/**)
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**", "/api/subjects", "/api/health").permitAll()
-                        // админские операции: раньше их мог вызвать любой студент
                         .requestMatchers(HttpMethod.POST, "/api/sessions").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/sessions/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/sessions/*/finish").hasRole("ADMIN")
@@ -78,7 +75,6 @@ public class SecurityConfig {
         objectMapper.writeValue(res.getWriter(), Map.of("status", status, "message", message));
     }
 
-    /** Нужен, только если фронтенд открыт с другого порта (например, Live Server). Со static/ тем же origin не используется. */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
@@ -90,7 +86,6 @@ public class SecurityConfig {
         return source;
     }
 
-    /** Фильтр уже встроен в цепочку Security — отключаем повторную регистрацию как servlet-фильтра. */
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(JwtAuthenticationFilter filter) {
         FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);

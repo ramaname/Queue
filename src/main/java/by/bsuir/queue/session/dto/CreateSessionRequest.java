@@ -26,7 +26,6 @@ public class CreateSessionRequest {
     @NotNull(message = "Укажите время открытия записи")
     private LocalDateTime unlockAt;
 
-    /** Если не указано — 10 минут. */
     @Min(value = 1, message = "Окно записи — минимум 1 минута")
     @Max(value = 1440, message = "Окно записи — максимум 1440 минут")
     private Integer windowMinutes;

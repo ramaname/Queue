@@ -41,7 +41,6 @@ public class SessionController {
         this.queueService = queueService;
     }
 
-    /** Только ADMIN (см. SecurityConfig). */
     @PostMapping
     @Transactional
     public SessionDto createSession(@Valid @RequestBody CreateSessionRequest request, Principal principal) {
@@ -73,15 +72,19 @@ public class SessionController {
                 .collect(Collectors.toList());
     }
 
-    /** Только ADMIN. */
     @DeleteMapping("/{id}")
     @Transactional
     public void deleteSession(@PathVariable Long id) {
-        if (!sessionRepository.existsById(id)) throw ApiException.notFound("Сессия не найдена");
-        sessionRepository.deleteById(id);
+        Session session = sessionRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> ApiException.notFound("Сессия не найдена"));
+        if (session.getCurrentBooking() != null) {
+            session.setCurrentBooking(null);
+            session.setCurrentTurnStartedAt(null);
+            sessionRepository.saveAndFlush(session);
+        }
+        sessionRepository.delete(session);
     }
 
-    /** Только ADMIN: досрочное завершение. */
     @PostMapping("/{id}/finish")
     public void finishSession(@PathVariable Long id) {
         queueService.finishSession(id);

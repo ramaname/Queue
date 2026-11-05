@@ -3,6 +3,7 @@ package by.bsuir.queue.log.model;
 import by.bsuir.queue.session.model.Session;
 import by.bsuir.queue.user.model.User;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;

@@ -35,7 +35,6 @@ public class Session {
     @Column(name = "window_minutes", nullable = false)
     private Integer windowMinutes = 10;
 
-    /** SCHEDULED → OPEN (идёт запись) → CLOSED (идёт сдача) → FINISHED */
     @Column(nullable = false, length = 20)
     private String status;
 

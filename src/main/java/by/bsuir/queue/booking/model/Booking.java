@@ -25,7 +25,6 @@ public class Booking {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    /** Время записи задаётся приложением (а не БД), чтобы все времена были по одним часам. */
     @Column(name = "booked_at", nullable = false)
     private LocalDateTime bookedAt;
 
@@ -35,11 +34,9 @@ public class Booking {
     @Column(name = "passes_done", nullable = false)
     private Integer passesDone = 0;
 
-    /** Когда студента последний раз пропустили (для аудита). */
     @Column(name = "skipped_at")
     private LocalDateTime skippedAt;
 
-    /** Когда бронь ушла в конец очереди (пропуск или сдача одной из нескольких лаб). */
     @Column(name = "requeued_at")
     private LocalDateTime requeuedAt;
 

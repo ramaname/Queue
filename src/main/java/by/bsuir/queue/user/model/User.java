@@ -32,7 +32,6 @@ public class User {
 
     @Override
     public String toString() {
-        // без passwordHash — чтобы хэш не попал в логи
         return "User{id=" + id + ", studentId=" + studentId + ", role=" + role + "}";
     }
 }

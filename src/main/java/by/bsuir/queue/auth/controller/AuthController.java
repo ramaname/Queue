@@ -36,7 +36,6 @@ public class AuthController {
     @PostMapping("/register")
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
         String studentId = request.getStudentId().trim();
-        // коллация utf8mb4_unicode_ci регистронезависима, поэтому «21b0452» и «21B0452» — один студент
         if (userRepository.findByStudentId(studentId).isPresent()) {
             throw ApiException.conflict("Студент с таким номером уже зарегистрирован");
         }
@@ -46,21 +45,19 @@ public class AuthController {
         user.setStudentId(studentId);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole("STUDENT");
-        userRepository.save(user);   // гонку двух одновременных регистраций ловит UNIQUE → 409 в обработчике
+        userRepository.save(user);
         return new AuthResponse(jwtService.generateToken(user));
     }
 
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         String studentId = request.getStudentId().trim();
-        // неверные данные → AuthenticationException → 401 в GlobalExceptionHandler
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(studentId, request.getPassword()));
         User user = userRepository.findByStudentId(studentId)
                 .orElseThrow(() -> ApiException.unauthorized("Неверный номер студента или пароль"));
         return new AuthResponse(jwtService.generateToken(user));
     }
 
-    /** Профиль по токену — на случай старых токенов без ФИО. */
     @GetMapping("/me")
     public MeResponse me(Principal principal) {
         User user = userRepository.findByStudentId(principal.getName())

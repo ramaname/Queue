@@ -17,7 +17,6 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
 
     List<Session> findByStatus(String status);
 
-    /** Блокировка строки сессии: сдача, пропуск, запись и планировщик не наступают друг другу на пятки. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from Session s where s.id = :id")
     Optional<Session> findByIdForUpdate(@Param("id") Long id);

@@ -5,15 +5,12 @@ import by.bsuir.queue.session.model.Session;
 import by.bsuir.queue.session.repository.SessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-/**
- * Раз в 10 секунд двигает сессии по жизненному циклу.
- * Сам метод не транзакционный: каждое действие — отдельная транзакция в QueueService
- * (с блокировкой строки сессии), поэтому ошибка в одной сессии не ломает остальные.
- */
 @Service
+@ConditionalOnProperty(name = "queue.scheduler.enabled", havingValue = "true", matchIfMissing = true)
 public class SessionScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(SessionScheduler.class);

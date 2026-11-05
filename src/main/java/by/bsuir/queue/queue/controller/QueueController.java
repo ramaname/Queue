@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
-/** Тонкий контроллер: вся логика и транзакции — в QueueService. */
 @RestController
 @RequestMapping("/api/sessions/{sessionId}")
 public class QueueController {
@@ -41,7 +40,6 @@ public class QueueController {
         return queueService.skip(sessionId, principal.getName());
     }
 
-    /** Только ADMIN (см. SecurityConfig). */
     @PostMapping("/admin-skip")
     public String adminSkip(@PathVariable Long sessionId) {
         return queueService.adminSkip(sessionId);

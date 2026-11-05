@@ -34,10 +34,6 @@ public class JwtService {
         return claimsResolver.apply(extractAllClaims(token));
     }
 
-    /**
-     * Токен содержит ФИО и роль, чтобы фронтенд знал, кто вошёл (в том числе после повторного входа),
-     * и показывал админские элементы. Роли — обычные строки: ["ROLE_ADMIN"], а не объекты authority.
-     */
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("fullName", user.getFullName());

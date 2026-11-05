@@ -52,8 +52,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             } catch (JwtException | IllegalArgumentException | AuthenticationException e) {
-                // Просроченный/поддельный токен или удалённый пользователь: раньше это был 500 из фильтра.
-                // Теперь запрос идёт дальше без аутентификации и получает 401 от EntryPoint.
                 log.debug("Токен отклонён: {}", e.getMessage());
                 SecurityContextHolder.clearContext();
             }

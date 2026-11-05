@@ -14,7 +14,6 @@ public class HealthController {
 
     private final SubjectRepository subjectRepository;
 
-    // Внедряем репозиторий через конструктор
     public HealthController(SubjectRepository subjectRepository) {
         this.subjectRepository = subjectRepository;
     }
@@ -26,7 +25,6 @@ public class HealthController {
 
     @GetMapping("/subjects")
     public List<Subject> getAllSubjects() {
-        // Возвращаем все 5 предметов из базы данных!
         return subjectRepository.findAll();
     }
 }
